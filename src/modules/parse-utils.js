@@ -12,35 +12,65 @@ class ParseUtils {
 		this.hash = Date.now().toString();
 		this.tmpDir = `../tmp/${this.hash}`;
 		this.pdfExportDir = '../results/converted';
+		this.faceExportDir = '../results/faces';
+		this.fileInfo = path.parse(this.file);
 		this.result = {
 			text: null,
 			face: null,
 			pdf: null
 		};
-		this.promise = [];
 	}
 	
+	/**
+	 * Parse selected document
+	 * @param program
+	 * @returns {Promise<boolean>}
+	 */
 	parse(program) {
 		
-		this.createTempDir();
+		let main = this;
+		main.createTempDir();
 		
-		if(program.text) {
-			this.promise['text'] = this.getText();
-		} // if
-		
-		if(program.images) {
-			this.promise['faces'] = this.findFaces();
-		} // if
-		
-		if(program.pdf) {
-			if(this.getExtension() !== '.pdf') {
-				this.promise['pdf'] = this.getPdf();
+		return new Promise(async function(resolve) {
+			
+			await main.updateExportDirectory(program);
+			
+			if(program.pdf) {
+				await main.getPdf();
 			} // if
-		} // if
-		
-		if(program.json) {
-			this.promise['json'] = JSON.stringify(this.result);
-		} // if
+			
+			if(program.text) {
+				await main.getText();
+			} // if
+			
+			if(program.images) {
+				
+				if(main.fileInfo.ext !== '.pdf') {
+					
+					if(!program.pdf) {
+						console.log(
+							`Command -i needs a pdf file. To convert document in pdf please add -p command`
+						);
+						
+						process.exit(1);
+					} // if
+					
+					await main.getPdf();
+					
+				} // if
+				
+				await main.findFaces();
+			} // if
+			
+			if(program.json) {
+				JSON.stringify(main.result);
+			} // if
+			
+			main.deleteTempDir().then(result => {
+				resolve(true);
+			});
+			
+		});
 		
 	}
 	
@@ -53,19 +83,35 @@ class ParseUtils {
 	
 	/**
 	 * Delete instance TMP directory
+	 * @returns {Promise<boolean>}
 	 */
 	deleteTempDir() {
-		rm(this.tmpDir, () => {
-			console.log('Temp folder deleted...');
+		
+		return new Promise(resolve => {
+			
+			rm(this.tmpDir, error => {
+				resolve(true);
+			});
+			
 		});
+		
 	}
 	
 	/**
-	 * Get file extension
-	 * @returns {string}
+	 * Set converted file as main file in this instance
+	 * @returns {Promise<boolean>}
 	 */
-	getExtension() {
-		return path.extname(this.file);
+	setConvertedDocumentAsMainFile() {
+		
+		let main = this;
+		
+		return new Promise(resolve => {
+			if(main.fileInfo.ext !== '.pdf' && main.result.pdf !== null) {
+				main.file = main.result.pdf;
+			} // if
+			
+			resolve(true);
+		});
 	}
 	
 	/**
@@ -75,13 +121,15 @@ class ParseUtils {
 		
 		let main = this;
 		
-		return new Promise(function(resolve) {
+		return new Promise(async function(resolve) {
 			
-			textract.fromFileWithPath(main.file, function(error, text) {
+			await main.setConvertedDocumentAsMainFile();
+			
+			await textract.fromFileWithPath(main.file, function(error, text) {
 				main.result.text = text;
+				resolve();
 			});
 			
-			resolve();
 		});
 		
 	}
@@ -94,41 +142,25 @@ class ParseUtils {
 		const path = `${this.tmpDir}/`;
 		let main = this;
 		
-		return new Promise(function(resolve) {
+		return new Promise(async resolve => {
 			
-			cmd.get(`pdfimages -png ${main.file} ${main.tmpDir}/img`, function(err) {
-				
-				if(!err) {
-					
-					fs.readdirSync(path).forEach(file => {
-						
-						// Ricerco volto tramite face utils
-						let face = new ImgParser(file, main.tmpDir, main.hash);
-						
-						face.detectFaceInPic().then(function(result) {
-							
-							if(!result) {
+			await main.setConvertedDocumentAsMainFile();
+			
+			await ImgParser.checkFaceInPics(path, main.file, main.faceExportDir, main.hash)
+				.then(async result => {
+					if(!result.result) {
+						ImgParser.guessFaceByAspectRatio(path, main.faceExportDir, main.hash)
+							.then(result => {
 								
-								ImgParser.guessFaceByAspectRatio(path, main.tmpDir, main.hash).then(function(result) {
-									if(result) {
-										main.result.face = `${main.hash}/${result.key}`;
-									} // if
-								});
+								if(result.result) {
+									main.result.face = result.key;
+								} // if
 								
-							} // if
-							
-						});
-						
-					});
-					
-					
-				} else {
-					console.log(err);
-				} // if
-				
-				resolve();
-				
-			});
+							});
+					} else {
+						main.result.face = result.key;
+					} // if
+				});
 			
 			resolve();
 			
@@ -137,14 +169,64 @@ class ParseUtils {
 	
 	/**
 	 * Convert document to PDF and save it in result folder
+	 * @returns {Promise<boolean>}
 	 */
 	getPdf() {
-		cmd.run(`/etc/bashrc; export HOME=/tmp/; /usr/bin/oowriter --convert-to pdf ${this.file} --outdir ${this.pdfExportDir} --headless`);
-		this.result.pdf = `${this.file}`;
+		
+		let main = this;
+		
+		return new Promise(async function(resolve) {
+			
+			if(main.fileInfo.ext !== '.pdf') {
+				await cmd.run(`/etc/bashrc; export HOME=/tmp/; /usr/bin/oowriter --convert-to pdf ${main.file} --outdir ${main.pdfExportDir} --headless`);
+				main.result.pdf = `${main.pdfExportDir}/${main.fileInfo.name}.pdf`;
+			} else {
+				await fs.createReadStream(`${main.file}`)
+					.pipe(fs.createWriteStream(`${main.pdfExportDir}/${main.fileInfo.base}`));
+				main.result.pdf = `${main.pdfExportDir}/${main.fileInfo.base}`;
+			} // if
+			
+			resolve(true);
+		});
+		
+		
 	}
 	
-	makeJsonFile() {
-		console.log(JSON.stringify(this.result));
+	/**
+	 *
+	 * @param program
+	 * @returns {Promise<boolean>}
+	 */
+	updateExportDirectory(program) {
+		
+		let main = this;
+		
+		return new Promise(resolve => {
+			
+			if(program.convertedDir) {
+				
+				if(!program.pdf) {
+					console.log(`WARNING: --converted-dir option require -p parameter`);
+					process.exit(1);
+				} // if
+				
+				main.pdfExportDir = program.convertedDir;
+			} // if
+			
+			if(program.faceDir) {
+				
+				if(!program.images) {
+					console.log(`WARNING: --face-dir option require -i parameter`);
+					process.exit(1);
+				} // if
+				
+				main.faceExportDir = program.faceDir;
+			} // if
+			
+			resolve(true);
+			
+		});
+		
 	}
 	
 }

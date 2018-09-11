@@ -1,5 +1,6 @@
 const fr = require('face-recognition');
 const fs = require('fs');
+const cmd = require('node-cmd');
 
 class ImgParser {
 	
@@ -9,12 +10,80 @@ class ImgParser {
 	 * @param hash
 	 */
 	constructor(file, tmpDir, hash) {
-		this.file = file;
-		this.image = fr.loadImage(`${tmpDir}/${file}`);
-		this.detector = fr.FaceDetector();
-		this.tmpDir = tmpDir;
-		this.hash = hash;
-		this.faces = [];
+		/*this.file = file;*/
+	}
+	
+	/**
+	 * @param path
+	 * @param file
+	 * @returns {Promise<boolean>}
+	 */
+	static extractImagesFromPDF(path, file) {
+		
+		return new Promise(async resolve => {
+			await cmd.get(`pdfimages -png ${file} ${path}/img`, err => {
+				resolve(true);
+			});
+			
+		});
+		
+	}
+	
+	/**
+	 * Detect faces through a list of pics.
+	 * This method will be use a face-recognition library
+	 */
+	static checkFaceInPics(path, file, outputDir, hash) {
+		
+		return new Promise(async resolve => {
+			
+			let faces = [];
+			
+			this.extractImagesFromPDF(path, file).then(async response => {
+				
+				let content = fs.readdirSync(path);
+				
+				for(let i in content) {
+					let activePic = content[i];
+					
+					let img = fr.loadImage(`${path}${activePic}`),
+						detector = fr.FaceDetector();
+					
+					if(img.cols >= 20) {
+						
+						let face = await detector.detectFaces(img);
+						
+						if(face.length !== 0) {
+							
+							faces.push(`${outputDir}/${hash}-${activePic}`);
+							
+							//console.log('Face found with primary algorithm! Coping in faces folder...');
+							
+							await fs.createReadStream(`${path}${activePic}`)
+								.pipe(fs.createWriteStream(`${outputDir}/${hash}-${activePic}`));
+							
+							resolve({
+								result: true,
+								hash: hash,
+								key: faces[faces.length - 1]
+							});
+							
+						}
+						
+					} // if
+					
+				} // for
+				
+				if(faces.length === 0) {
+					resolve({
+						result: false
+					});
+				}
+				
+			});
+			
+		});
+		
 	}
 	
 	/**
@@ -22,18 +91,22 @@ class ImgParser {
 	 * This is a "backup" method that will be used if the first one did not throw any faces.
 	 * The export method is included.
 	 * @param path
-	 * @param tmpDir
+	 * @param outputDir
 	 * @param hash
 	 */
-	static guessFaceByAspectRatio(path, tmpDir, hash) {
+	static guessFaceByAspectRatio(path, outputDir, hash) {
 		
-		let images = [],
-			result = {key: null, size: 0};
-		
-		return new Promise(function(resolve) {
+		return new Promise(async function(resolve) {
+			
+			let images = [],
+				result = {
+					key: null,
+					size: 0
+				};
+			
 			
 			fs.readdirSync(path).forEach(file => {
-				let image = fr.loadImage(`${tmpDir}/${file}`),
+				let image = fr.loadImage(`${path}${file}`),
 					ratio = Math.max(image.rows, image.cols) / Math.min(image.rows, image.cols);
 				
 				if(ratio < 2) {
@@ -41,7 +114,7 @@ class ImgParser {
 					let values = null;
 					
 					if(ratio === 1) {
-						values = ratio * ratio;
+						values = image.rows * image.rows;
 					} else {
 						values = image.rows * image.cols;
 					} // if
@@ -61,68 +134,27 @@ class ImgParser {
 				
 			} // for
 			
-			console.log(result);
-			
 			if(result.size !== 0) {
-				console.log('Face found! Coping in faces 555 folder...');
+				//console.log('Face found with backup algorithm! Coping in faces folder...');
 				
-				fs.createReadStream(`${tmpDir}/${result.key}`)
-					.pipe(fs.createWriteStream(`../results/faces/${hash}-${result.key}`));
+				await fs.createReadStream(`${path}${result.key}`)
+					.pipe(fs.createWriteStream(`${outputDir}/${hash}-${result.key}`));
 				
-				resolve(true);
-			} // if
-			
-			resolve(false);
-		});
-		
-	}
-	
-	/**
-	 * Detect faces through a list of pics.
-	 * This method will be use a face-recognition library
-	 */
-	detectFaceInPic() {
-		
-		let main = this;
-		
-		return new Promise(function(resolve) {
-			if(main.image.cols >= 20) {
-				main.faces = main.detector.detectFaces(main.image);
-			} // if
-			
-			if(main.faces.length !== 0) {
-				let exportFace = main.exportFaces();
-				
-				exportFace.then(function() {
-					resolve(true);
+				resolve({
+					result: true,
+					hash: hash,
+					key: `${outputDir}/${hash}-${result.key}`
 				});
 				
+			} else {
+				resolve({
+					result: false
+				});
 			} // if
 			
-			resolve(false);
-		});
-		
-		
-	}
-	
-	/**
-	 * Export faces in result directory
-	 */
-	exportFaces() {
-		
-		let main = this;
-		
-		return new Promise(function(resolve) {
-			console.log('Face found! Coping in faces folder...');
-			
-			fs.createReadStream(`${main.tmpDir}/${main.file}`)
-				.pipe(fs.createWriteStream(`../results/faces/${main.hash}-${main.file}`));
-			
-			resolve();
 		});
 		
 	}
-	
 	
 }
 
