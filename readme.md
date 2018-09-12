@@ -1,5 +1,5 @@
-# ResumeParser
-A simple Node.js CLI for parse a resume.
+# Resume Parser CLI
+A simple Node.js CLI for parse a resume. [Official GitHub Repository](https://github.com/RobyFerro/DocumentParserCLI)
 
 ### Requirements
 

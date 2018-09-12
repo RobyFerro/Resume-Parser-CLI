@@ -55,7 +55,9 @@ class ParseUtils {
 						process.exit(1);
 					} // if
 					
-					await main.getPdf();
+					if(!program.pdf) {
+						await main.getPdf();
+					} // if
 					
 				} // if
 				
@@ -66,7 +68,7 @@ class ParseUtils {
 				JSON.stringify(main.result);
 			} // if
 			
-			main.deleteTempDir().then(result => {
+			main.deleteTempDir().then(() => {
 				resolve(true);
 			});
 			
@@ -89,7 +91,7 @@ class ParseUtils {
 		
 		return new Promise(resolve => {
 			
-			rm(this.tmpDir, error => {
+			rm(this.tmpDir, () => {
 				resolve(true);
 			});
 			
