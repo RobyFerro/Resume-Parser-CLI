@@ -7,12 +7,13 @@ const ImgParser = require('./img-parser');
 
 class ParseUtils {
 	
-	constructor(file) {
+	constructor(file, dirname) {
 		this.file = file;
+		this.dirname = dirname;
 		this.hash = Date.now().toString();
-		this.tmpDir = `../tmp/${this.hash}`;
-		this.pdfExportDir = '../results/converted';
-		this.faceExportDir = '../results/faces';
+		this.tmpDir = `${dirname}/tmp/${this.hash}`;
+		this.pdfExportDir = null;
+		this.faceExportDir = null;
 		this.fileInfo = path.parse(this.file);
 		this.result = {
 			text: null,
@@ -36,6 +37,11 @@ class ParseUtils {
 			await main.updateExportDirectory(program);
 			
 			if(program.pdf) {
+				
+				if(!program.convertedDir) {
+					console.log('Command -p require to specify an output directory. Please set this option through --converted-dir command');
+				} // if
+				
 				await main.getPdf();
 			} // if
 			
@@ -48,6 +54,7 @@ class ParseUtils {
 				if(main.fileInfo.ext !== '.pdf') {
 					
 					if(!program.pdf) {
+						
 						console.log(
 							`Command -i needs a pdf file. To convert document in pdf please add -p command`
 						);
@@ -59,6 +66,10 @@ class ParseUtils {
 						await main.getPdf();
 					} // if
 					
+				} // if
+				
+				if(!program.faceDir) {
+					console.log('Command -i require to specify an output directory. Please set this option through --face-dir command');
 				} // if
 				
 				await main.findFaces();
@@ -80,6 +91,11 @@ class ParseUtils {
 	 * Create TMP directory for this instance
 	 */
 	createTempDir() {
+		
+		if(!fs.existsSync(`${this.dirname}/tmp`)) {
+			fs.mkdirSync(`${this.dirname}/tmp`);
+		} // if
+		
 		fs.mkdirSync(this.tmpDir);
 	}
 	

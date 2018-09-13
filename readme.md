@@ -2,6 +2,7 @@
 A simple Node.js CLI for parse a resume. [Official GitHub Repository](https://github.com/RobyFerro/DocumentParserCLI)
 
 ## Requirements
+* Node 10.04.*
 ### Linux dependencies
 ##### cmake 
 ###### Fedora:
@@ -16,7 +17,7 @@ OPTIONAL Install for improve CPU performance during face recognition:
     sudo apt-get install libopenblas-dev
 ##### libx11 (XQuartz on OSX)
 ###### Fedora:
-    yum install libX11
+    yum install libX11-devel.x86_64
 ###### Debian:
     sudo apt-get install libx11-dev
 ##### libpng 

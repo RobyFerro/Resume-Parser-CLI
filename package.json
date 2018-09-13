@@ -1,10 +1,16 @@
 {
   "name": "resume-parser-cli",
-  "version": "1.0.2-rc.1",
+  "version": "1.0.2-rc.10",
   "description": "Resume Parser CLI",
+  "homepage": "https://github.com/RobyFerro/DocumentParserCLI",
   "main": "src/parser.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "directories": {
+  },
+  "bin": {
+    "rparser": "./src/parser.js"
   },
   "author": "Roberto Ferro - Interactive Knowledge Development",
   "license": "ISC",
