@@ -157,6 +157,11 @@ class ParseUtils {
 		
 	}
 	
+	/**
+	 * Check for information inside a given text
+	 * @param text
+	 * @returns {Promise<object>}
+	 */
 	findDataInText(text) {
 		
 		return new Promise(resolve => {

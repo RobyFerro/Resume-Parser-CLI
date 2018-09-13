@@ -65,3 +65,16 @@ rparse -f <filename> <option>
     --converted-dir [value]  Select output dir converted pdf. This option require -p command
     -h, --help               output usage information
 ```
+
+
+## Install with global options
+I suggest to install this package with a --global options. In this way you'll can use this tools simple typing 
+```
+rparse -f <file> <option>
+```
+
+If you throw some problem during the installation make sure to grant the right permission in node with this commands
+```
+npm config set user 0
+npm config set unsafe-perm true
+```
