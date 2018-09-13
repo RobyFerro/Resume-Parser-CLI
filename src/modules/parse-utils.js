@@ -127,13 +127,34 @@ class ParseUtils {
 			
 			await main.setConvertedDocumentAsMainFile();
 			
-			await textract.fromFileWithPath(main.file, function(error, text) {
-				main.result.text = text;
+			await textract.fromFileWithPath(main.file, async function(error, text) {
+				//main.result.text = text;
+				main.result.text = await main.findDataInText(text);
 				resolve();
 			});
 			
 		});
 		
+	}
+	
+	findDataInText(text) {
+		
+		return new Promise(resolve => {
+			
+			let mail = text.match(/([a-z0-9_.-]+)@([\da-z.-]+)\.([a-z.]{2,6})/),
+				phone = text.match(/(?:(?:\+?([1-9]|[0-9][0-9]|[0-9][0-9][0-9])\s*(?:[.-]\s*)?)?(?:\(\s*([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9])\s*\)|([0-9][1-9]|[0-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9]))\s*(?:[.-]\s*)?)?([2-9]1[02-9]|[2-9][02-9]1|[2-9][02-9]{2})\s*(?:[.-]\s*)?([0-9]{4})(?:\s*(?:#|x\.?|ext\.?|extension)\s*(\d+))?/),
+				name = text.match(/[A-Z][a-z]+\s[A-Z][a-z]+/),
+				birthday = text.match(/(0?[0-9]|1[0-9]|2[0-9]|3[0-1])\/(0?[0-9]|1[0-2])\/((\d{2}?\d{2})|\d{2})/);
+			
+			resolve({
+				email: mail.length > 0 ? mail[0] : null,
+				phone: phone.length > 0 ? phone[0] : null,
+				name: name.length > 0 ? name[0] : null,
+				birthday: birthday.length > 0 ? birthday[0] : null,
+				raw: text
+			});
+			
+		});
 	}
 	
 	/**
