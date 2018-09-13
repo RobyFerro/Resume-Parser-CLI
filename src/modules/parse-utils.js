@@ -12,8 +12,8 @@ class ParseUtils {
 		this.dirname = dirname;
 		this.hash = Date.now().toString();
 		this.tmpDir = `${dirname}/tmp/${this.hash}`;
-		this.pdfExportDir = null;
-		this.faceExportDir = null;
+		this.pdfExportDir = '';
+		this.faceExportDir = '';
 		this.fileInfo = path.parse(this.file);
 		this.result = {
 			text: null,
@@ -40,6 +40,7 @@ class ParseUtils {
 				
 				if(!program.convertedDir) {
 					console.log('Command -p require to specify an output directory. Please set this option through --converted-dir command');
+					process.exit(1);
 				} // if
 				
 				await main.getPdf();
@@ -70,6 +71,7 @@ class ParseUtils {
 				
 				if(!program.faceDir) {
 					console.log('Command -i require to specify an output directory. Please set this option through --face-dir command');
+					process.exit(1);
 				} // if
 				
 				await main.findFaces();
