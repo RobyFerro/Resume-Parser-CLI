@@ -5,79 +5,47 @@ A simple Node.js CLI for parse a resume. [Official GitHub Repository](https://gi
 ### Linux dependencies
 ##### cmake 
 ###### Fedora:
-    ```
     yum install cmake
-    ```
 ###### Debian:
-    ```
     apt-get install cmake
-    ```
 ##### libopenblas-dev
 OPTIONAL Install for improve CPU performance during face recognition:  
 ###### Fedora:
-    ```
     yum install openblas-devel.x86_64
-    ```
 ###### Debian: 
-    ```
     sudo apt-get install libopenblas-dev
-    ```
 ##### libx11 (XQuartz on OSX)
 ###### Fedora:
-    ```
     yum install libX11
-    ```
 ###### Debian:
-    ``` 
     sudo apt-get install libx11-dev
-    ```
 ##### libpng 
 ###### Fedora:
-    ```
     yum install libpng-devel
-    ```
 ###### Debian:
-    ```
     sudo apt-get install libpng-dev
-    ```
 ##### pdftotext 
 ###### Fedora: 
-    ```
     yum install poppler-utils
-    ```
 ###### Debian:
-    ```
     sudo apt-get install poppler-utils
-    ```
 ##### antiword 
 ###### Fedora:
-    ```
     wget https://forensics.cert.org/cert-forensics-tools-release-el7.rpm
     rpm -Uvh cert-forensics-tools-release*rpm
     yum --enablerepo=forensics install antiword
-    ``` 
 ###### Debian: 
-    ```
     sudo apt-get install antiword
-    ```
 ##### unrtf
 ###### Fedora:
-    ```
     yum install unrtf
-    ```
 ###### Debian:
-    ```
     sudo apt-get install unrtf
-    ```
 ##### tesseract 
 ###### Fedora:
-    ```
     yum install tesseract
-    ```
 ###### Debian:
-    ```
     sudo apt-get install tesseract-ocr
-    ```
 
 ### Options
 ```
