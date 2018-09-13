@@ -1,6 +1,6 @@
 {
   "name": "resume-parser-cli",
-  "version": "1.0.0-Beta.20180913.1",
+  "version": "1.0.0-Beta.20180913",
   "description": "Resume Parser CLI",
   "homepage": "https://github.com/RobyFerro/DocumentParserCLI",
   "main": "src/parser.js",

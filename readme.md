@@ -68,7 +68,7 @@ rparse -f <filename> <option>
 
 
 ## Install with global options
-I suggest to install this package with a --global options. In this way you'll can use this tools simple typing 
+I suggest to install this package with a --global option. In this way you'll can use this tool typing 
 ```
 rparse -f <file> <option>
 ```
