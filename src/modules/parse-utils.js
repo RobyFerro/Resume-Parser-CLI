@@ -146,7 +146,9 @@ class ParseUtils {
 			await main.setConvertedDocumentAsMainFile();
 			
 			await textract.fromFileWithPath(main.file, async function(error, text) {
-				//main.result.text = text;
+				
+				if(error) throw error;
+				
 				main.result.text = await main.findDataInText(text);
 				resolve();
 			});
@@ -165,10 +167,10 @@ class ParseUtils {
 				birthday = text.match(/(0?[0-9]|1[0-9]|2[0-9]|3[0-1])\/(0?[0-9]|1[0-2])\/((\d{2}?\d{2})|\d{2})/);
 			
 			resolve({
-				email: mail.length > 0 ? mail[0] : null,
-				phone: phone.length > 0 ? phone[0] : null,
-				name: name.length > 0 ? name[0] : null,
-				birthday: birthday.length > 0 ? birthday[0] : null,
+				email: mail !== null ? mail[0] : null,
+				phone: phone !== null ? phone[0] : null,
+				name: name !== null ? name[0] : null,
+				birthday: birthday !== null ? birthday[0] : null,
 				raw: text
 			});
 			
@@ -245,22 +247,10 @@ class ParseUtils {
 		return new Promise(resolve => {
 			
 			if(program.convertedDir) {
-				
-				if(!program.pdf) {
-					console.log(`WARNING: --converted-dir option require -p parameter`);
-					process.exit(1);
-				} // if
-				
 				main.pdfExportDir = program.convertedDir;
 			} // if
 			
 			if(program.faceDir) {
-				
-				if(!program.images) {
-					console.log(`WARNING: --face-dir option require -i parameter`);
-					process.exit(1);
-				} // if
-				
 				main.faceExportDir = program.faceDir;
 			} // if
 			
