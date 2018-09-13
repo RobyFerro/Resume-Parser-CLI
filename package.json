@@ -1,7 +1,7 @@
 {
   "name": "resume-parser-cli",
-  "version": "1.0.0-Beta.20180913",
-  "description": "Resume Parser CLI",
+  "version": "1.0.0-Beta.20180913-1",
+  "description": "A Node.js CLI tool to parse Resume / CV to JSON object",
   "homepage": "https://github.com/RobyFerro/DocumentParserCLI",
   "main": "src/parser.js",
   "scripts": {
