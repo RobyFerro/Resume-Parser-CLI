@@ -1,5 +1,5 @@
 # Resume Parser CLI
-A simple Node.js CLI for parse a resume. [Official GitHub Repository](https://github.com/RobyFerro/DocumentParserCLI)
+A simple Node.js CLI for parse a resume.
 
 ## Requirements
 * Node 10.04.*
@@ -49,6 +49,9 @@ OPTIONAL Install for improve CPU performance during face recognition:
     sudo apt-get install tesseract-ocr
 
 ### Options
+```
+rparse -f <filename> <option>
+```
 ```
     -V, --version            output the version number
     -f, --file [value]       REQUIRED: Add file to parse.
