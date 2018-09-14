@@ -231,7 +231,14 @@ class ParseUtils {
 				main.result.pdf = `${main.pdfExportDir}/${main.fileInfo.name}.pdf`;
 			} else {
 				
-				await fs.copyFile(`${main.file}`, `${main.pdfExportDir}/${main.fileInfo.base}`, err => {
+				let export_file = `${main.pdfExportDir}/${main.fileInfo.base}`;
+				
+				// Check if file exists
+				if(fs.existsSync(export_file)) {
+					export_file = `${main.fileInfo.name}(1).${main.fileInfo.ext}`;
+				} // if
+				
+				await fs.copyFile(`${main.file}`, export_file, err => {
 					
 					if(err) throw err;
 					main.result.pdf = `${main.pdfExportDir}/${main.fileInfo.base}`;
