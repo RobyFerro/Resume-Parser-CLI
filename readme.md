@@ -1,6 +1,24 @@
 # Resume Parser CLI
 A simple Node.js CLI for parse a resume.
 
+## Getting started
+```
+npm install -g resume-parser-cli
+```
+
+#### Usage
+
+```
+rparse -f <file> <option>
+```
+
+#### In case of error
+If you throw some problem during the installation make sure to grant the right permission in node with this commands
+```
+npm config set user 0
+npm config set unsafe-perm true
+```
+
 ## Requirements
 * Node 10.04.*
 ### Linux dependencies
@@ -66,15 +84,3 @@ rparse -f <filename> <option>
     -h, --help               output usage information
 ```
 
-
-## Install with global options
-I suggest to install this package with a --global option. In this way you'll can use this tool typing 
-```
-rparse -f <file> <option>
-```
-
-If you throw some problem during the installation make sure to grant the right permission in node with this commands
-```
-npm config set user 0
-npm config set unsafe-perm true
-```

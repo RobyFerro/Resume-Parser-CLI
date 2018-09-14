@@ -1,6 +1,6 @@
 {
   "name": "resume-parser-cli",
-  "version": "1.0.0-Beta.20180914-1",
+  "version": "1.0.0-Beta.20180914-3",
   "description": "A Node.js CLI tool to parse Resume / CV to JSON object",
   "homepage": "https://github.com/RobyFerro/DocumentParserCLI",
   "main": "src/parser.js",
@@ -11,7 +11,7 @@
   "bin": {
     "rparser": "./src/parser.js"
   },
-  "author": "Roberto Ferro - Interactive Knowledge Development",
+  "author": "Roberto Ferro <info@ikdev.eu> (http://www.ikdev.eu/)",
   "license": "ISC",
   "dependencies": {
     "commander": "^2.18.0",
