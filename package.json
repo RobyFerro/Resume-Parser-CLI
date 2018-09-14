@@ -16,6 +16,7 @@
   "dependencies": {
     "commander": "^2.18.0",
     "face-recognition": "^0.9.3",
+    "fs-copy-file": "^2.1.2",
     "jsonfile": "^4.0.0",
     "natural": "^0.6.1",
     "node-cmd": "^3.0.0",

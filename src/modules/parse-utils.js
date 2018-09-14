@@ -4,6 +4,7 @@ const cmd = require('node-cmd');
 const fs = require('fs');
 const rm = require('rimraf');
 const ImgParser = require('./img-parser');
+const copyFile = require('fs-copy-file');
 
 class ParseUtils {
 	
@@ -229,10 +230,13 @@ class ParseUtils {
 				await cmd.run(`/etc/bashrc; export HOME=/tmp/; /usr/bin/oowriter --convert-to pdf ${main.file} --outdir ${main.pdfExportDir} --headless`);
 				main.result.pdf = `${main.pdfExportDir}/${main.fileInfo.name}.pdf`;
 			} else {
-				await fs.createReadStream(`${main.file}`)
-					.pipe(fs.createWriteStream(`${main.pdfExportDir}/${main.fileInfo.base}`));
 				
-				main.result.pdf = `${main.pdfExportDir}/${main.fileInfo.base}`;
+				await fs.copyFile(`${main.file}`, `${main.pdfExportDir}/${main.fileInfo.base}`, err => {
+					
+					if(err) throw err;
+					main.result.pdf = `${main.pdfExportDir}/${main.fileInfo.base}`;
+				});
+				
 			} // if
 			
 			resolve(true);
