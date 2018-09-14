@@ -4,7 +4,6 @@ const cmd = require('node-cmd');
 const fs = require('fs');
 const rm = require('rimraf');
 const ImgParser = require('./img-parser');
-const copyFile = require('fs-copy-file');
 
 class ParseUtils {
 	
@@ -44,6 +43,7 @@ class ParseUtils {
 					process.exit(1);
 				} // if
 				
+				await main.setConvertedDocumentAsMainFile();
 				await main.getPdf();
 			} // if
 			
@@ -143,8 +143,6 @@ class ParseUtils {
 		let main = this;
 		
 		return new Promise(async function(resolve) {
-			
-			await main.setConvertedDocumentAsMainFile();
 			
 			await textract.fromFileWithPath(main.file, async function(error, text) {
 				
