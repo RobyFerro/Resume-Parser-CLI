@@ -231,6 +231,7 @@ class ParseUtils {
 			} else {
 				await fs.createReadStream(`${main.file}`)
 					.pipe(fs.createWriteStream(`${main.pdfExportDir}/${main.fileInfo.base}`));
+				
 				main.result.pdf = `${main.pdfExportDir}/${main.fileInfo.base}`;
 			} // if
 			
