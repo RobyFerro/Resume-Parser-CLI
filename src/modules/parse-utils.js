@@ -4,6 +4,7 @@ const cmd = require('node-cmd');
 const fs = require('fs');
 const rm = require('rimraf');
 const ImgParser = require('./img-parser');
+const jsonFile = require('jsonfile');
 
 class ParseUtils {
 	
@@ -14,6 +15,7 @@ class ParseUtils {
 		this.tmpDir = `${dirname}/tmp/${this.hash}`;
 		this.pdfExportDir = '';
 		this.faceExportDir = '';
+		this.jsonExportDir = '';
 		this.fileInfo = path.parse(this.file);
 		this.result = {
 			text: null,
@@ -79,7 +81,17 @@ class ParseUtils {
 			} // if
 			
 			if(program.json) {
-				JSON.stringify(main.result);
+				//safeJsonSringify(main.result);
+				
+				if(!program.jsonDir) {
+					console.log('Command -j require to specify an output directory. Please set this option through --json-dir command');
+					process.exit(1);
+				} // if
+				
+				let file = `${main.jsonExportDir}/${main.fileInfo.name}.json`;
+				jsonFile.writeFileSync(file, main.result, error => {
+					if(error) throw error;
+				});
 			} // if
 			
 			main.deleteTempDir().then(() => {
@@ -267,6 +279,10 @@ class ParseUtils {
 			
 			if(program.faceDir) {
 				main.faceExportDir = program.faceDir;
+			} // if
+			
+			if(program.jsonDir) {
+				main.jsonExportDir = program.jsonDir;
 			} // if
 			
 			resolve(true);
