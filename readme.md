@@ -12,6 +12,23 @@ npm install -g resume-parser-cli
 rparse -f <file> <option>
 ```
 
+### Options
+```
+rparse -f <filename> <option>
+```
+```
+     -V, --version         output the version number
+     -f, --file [value]    REQUIRED: Add file to parse.
+     --export-dir [value]  Select output dir for exported results.
+     -t, --text            Get document text
+     -i, --images          Find faces inside document
+     -p, --pdf             Convert document in pdf
+     -c, --clear           Clear result directory
+     -j, --json            Export result as JSON
+     -s, --show            Show progress in console
+     -h, --help            output usage information
+```
+
 #### In case of error
 If you throw some problem during the installation make sure to grant the right permission in node with this commands
 ```
@@ -65,22 +82,4 @@ OPTIONAL Install for improve CPU performance during face recognition:
     yum install tesseract
 ###### Debian:
     sudo apt-get install tesseract-ocr
-
-### Options
-```
-rparse -f <filename> <option>
-```
-```
-    -V, --version            output the version number
-    -f, --file [value]       REQUIRED: Add file to parse.
-    -t, --text               Get document text
-    -i, --images             Find faces inside document
-    -p, --pdf                Convert document in pdf
-    -c, --clear              Clear result directory
-    -j, --json               Export result as JSON
-    -s, --show               Show progress in console
-    --face-dir [value]       Select output dir for face img. This option require -i command
-    --converted-dir [value]  Select output dir converted pdf. This option require -p command
-    -h, --help               output usage information
-```
 

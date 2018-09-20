@@ -13,14 +13,13 @@ class ParseUtils {
 		this.dirname = dirname;
 		this.hash = Date.now().toString();
 		this.tmpDir = `${dirname}/tmp/${this.hash}`;
-		this.pdfExportDir = '';
-		this.faceExportDir = '';
-		this.jsonExportDir = '';
+		this.exportDir = '';
 		this.fileInfo = path.parse(this.file);
 		this.result = {
 			text: null,
 			face: null,
-			pdf: null
+			pdf: null,
+			json: null
 		};
 	}
 	
@@ -34,17 +33,16 @@ class ParseUtils {
 		let main = this;
 		main.createTempDir();
 		
+		if(!program.exportDir) {
+			console.log('Command --export-dir is required!');
+			process.exit(1);
+		} else {
+			main.exportDir = program.exportDir;
+		} // if
+		
 		return new Promise(async function(resolve) {
 			
-			await main.updateExportDirectory(program);
-			
 			if(program.pdf) {
-				
-				if(!program.convertedDir) {
-					console.log('Command -p require to specify an output directory. Please set this option through --converted-dir command');
-					process.exit(1);
-				} // if
-				
 				await main.setConvertedDocumentAsMainFile();
 				await main.getPdf();
 			} // if
@@ -72,24 +70,14 @@ class ParseUtils {
 					
 				} // if
 				
-				if(!program.faceDir) {
-					console.log('Command -i require to specify an output directory. Please set this option through --face-dir command');
-					process.exit(1);
-				} // if
-				
 				await main.findFaces();
 			} // if
 			
 			if(program.json) {
-				//safeJsonSringify(main.result);
 				
-				if(!program.jsonDir) {
-					console.log('Command -j require to specify an output directory. Please set this option through --json-dir command');
-					process.exit(1);
-				} // if
+				main.result.json = `${main.exportDir}/${main.fileInfo.name}.json`;
 				
-				let file = `${main.jsonExportDir}/${main.fileInfo.name}.json`;
-				jsonFile.writeFileSync(file, main.result, error => {
+				jsonFile.writeFileSync(main.result.json, main.result, error => {
 					if(error) throw error;
 				});
 			} // if
@@ -182,13 +170,26 @@ class ParseUtils {
 				name = text.match(/[A-Z][a-z]+\s[A-Z][a-z]+/),
 				birthday = text.match(/(0?[0-9]|1[0-9]|2[0-9]|3[0-1])\/(0?[0-9]|1[0-2])\/((\d{2}?\d{2})|\d{2})/);
 			
-			resolve({
+			let data = {
 				email: mail !== null ? mail[0] : null,
 				phone: phone !== null ? phone[0] : null,
-				name: name !== null ? name[0] : null,
+				person: {
+					fullName: name !== null ? name[0] : null,
+					name: null,
+					surname: null
+				},
 				birthday: birthday !== null ? birthday[0] : null,
 				raw: text
-			});
+			};
+			
+			if(data.person.fullName !== null) {
+				let split = data.person.fullName.split(' ');
+				
+				data.person.name = split[0];
+				data.person.surname = split[1];
+			} // if
+			
+			resolve(data);
 			
 		});
 	}
@@ -205,10 +206,10 @@ class ParseUtils {
 			
 			await main.setConvertedDocumentAsMainFile();
 			
-			await ImgParser.checkFaceInPics(path, main.file, main.faceExportDir, main.hash)
+			await ImgParser.checkFaceInPics(path, main.file, main.exportDir, main.hash)
 				.then(async result => {
 					if(!result.result) {
-						ImgParser.guessFaceByAspectRatio(path, main.faceExportDir, main.hash)
+						ImgParser.guessFaceByAspectRatio(path, main.exportDir, main.hash)
 							.then(result => {
 								
 								if(result.result) {
@@ -237,57 +238,26 @@ class ParseUtils {
 		return new Promise(async function(resolve) {
 			
 			if(main.fileInfo.ext !== '.pdf') {
-				await cmd.run(`/etc/bashrc; export HOME=/tmp/; /usr/bin/oowriter --convert-to pdf ${main.file} --outdir ${main.pdfExportDir} --headless`);
-				main.result.pdf = `${main.pdfExportDir}/${main.fileInfo.name}.pdf`;
+				await cmd.run(`/etc/bashrc; export HOME=/tmp/; /usr/bin/oowriter --convert-to pdf ${main.file} --outdir ${main.exportDir} --headless`);
 			} else {
 				
-				let export_file = `${main.pdfExportDir}/${main.fileInfo.base}`;
+				let export_file = `${main.exportDir}/${main.fileInfo.base}`;
 				
 				// Check if file exists
 				if(fs.existsSync(export_file)) {
-					export_file = `${main.fileInfo.name}(1).${main.fileInfo.ext}`;
+					export_file = `${main.exportDir}/${main.fileInfo.name}(1).${main.fileInfo.ext}`;
 				} // if
 				
-				await fs.copyFile(`${main.file}`, export_file, err => {
-					
-					if(err) throw err;
-					main.result.pdf = `${main.pdfExportDir}/${main.fileInfo.base}`;
-				});
+				await fs.createReadStream(`${main.file}`)
+					.pipe(fs.createWriteStream(`${export_file}`));
 				
 			} // if
 			
+			main.result.pdf = `${main.exportDir}/${main.fileInfo.name}.pdf`;
+			
 			resolve(true);
 		});
 		
-		
-	}
-	
-	/**
-	 *
-	 * @param program
-	 * @returns {Promise<boolean>}
-	 */
-	updateExportDirectory(program) {
-		
-		let main = this;
-		
-		return new Promise(resolve => {
-			
-			if(program.convertedDir) {
-				main.pdfExportDir = program.convertedDir;
-			} // if
-			
-			if(program.faceDir) {
-				main.faceExportDir = program.faceDir;
-			} // if
-			
-			if(program.jsonDir) {
-				main.jsonExportDir = program.jsonDir;
-			} // if
-			
-			resolve(true);
-			
-		});
 		
 	}
 	

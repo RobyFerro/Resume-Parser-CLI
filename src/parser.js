@@ -5,9 +5,10 @@ const program = require('commander');
 program
 	.version('Beta.1')
 	.option('-f, --file [value]', 'REQUIRED: Add file to parse.')
-	.option('--face-dir [value]', 'REQUIRED: Select output dir for face img. This option require -i command')
-	.option('--converted-dir [value]', 'REQUIRED: Select output dir converted pdf. This option require -p command')
-	.option('--json-dir [value]', 'Select output dir for JSON file. This option require -j command')
+	//.option('--face-dir [value]', 'REQUIRED: Select output dir for face img. This option require -i command')
+	//.option('--converted-dir [value]', 'REQUIRED: Select output dir converted pdf. This option require -p command')
+	//.option('--json-dir [value]', 'Select output dir for JSON file. This option require -j command')
+	.option('--export-dir [value]', 'Select output dir for exported results.')
 	.option('-t, --text', 'Get document text')
 	.option('-i, --images', 'Find faces inside document')
 	.option('-p, --pdf', 'Convert document in pdf')
