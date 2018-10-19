@@ -38,6 +38,8 @@ npm config set unsafe-perm true
 
 ## Requirements
 * Node 10.04.*
+* Apache OpenOffice Writer 
+
 ### Linux dependencies
 ##### cmake 
 ###### Fedora:

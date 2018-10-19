@@ -109,7 +109,7 @@ class ImgParser {
 				let image = fr.loadImage(`${path}${file}`),
 					ratio = Math.max(image.rows, image.cols) / Math.min(image.rows, image.cols);
 				
-				if(ratio < 2) {
+				if(ratio < 2 && image.rows > 150) {
 					
 					let values = null;
 					
