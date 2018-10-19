@@ -1,12 +1,36 @@
 const path = require('path');
 const textract = require('textract');
-const cmd = require('node-cmd');
 const fs = require('fs');
 const rm = require('rimraf');
 const ImgParser = require('./img-parser');
 const jsonFile = require('jsonfile');
+const execSync = require('child_process').execSync;
 
 class ParseUtils {
+	
+	/**
+	 *
+	 * @param file
+	 * @returns {Promise<string>}
+	 */
+	static createTmpFile(file) {
+		
+		return new Promise(async resolve => {
+			
+			let tmpFile = file.replace(/ /g, "_");
+			fs.copyFileSync(file, tmpFile);
+			
+			resolve(tmpFile);
+		});
+		
+	}
+	
+	/**
+	 * @param file
+	 */
+	static deleteTmpFile(file) {
+		fs.unlinkSync(file);
+	}
 	
 	constructor(file, dirname) {
 		this.file = file;
@@ -43,8 +67,9 @@ class ParseUtils {
 		return new Promise(async function(resolve) {
 			
 			if(program.pdf) {
-				await main.setConvertedDocumentAsMainFile();
-				await main.getPdf();
+				await main.getPdf().then(async function() {
+					await main.setConvertedDocumentAsMainFile();
+				});
 			} // if
 			
 			if(program.text) {
@@ -80,6 +105,7 @@ class ParseUtils {
 				jsonFile.writeFileSync(main.result.json, main.result, error => {
 					if(error) throw error;
 				});
+				
 			} // if
 			
 			main.deleteTempDir().then(() => {
@@ -144,7 +170,7 @@ class ParseUtils {
 		
 		return new Promise(async function(resolve) {
 			
-			await textract.fromFileWithPath(main.file, async function(error, text) {
+			textract.fromFileWithPath(main.file, async function(error, text) {
 				
 				if(error) throw error;
 				
@@ -238,7 +264,7 @@ class ParseUtils {
 		return new Promise(async function(resolve) {
 			
 			if(main.fileInfo.ext !== '.pdf') {
-				await cmd.run(`/etc/bashrc; export HOME=/tmp/; /usr/bin/oowriter --convert-to pdf ${main.file} --outdir ${main.exportDir} --headless`);
+				execSync(`/etc/bashrc; export HOME=/tmp/; /usr/bin/oowriter --convert-to pdf ${main.file} --outdir ${main.exportDir} --headless`);
 			} else {
 				
 				let export_file = `${main.exportDir}/${main.fileInfo.base}`;
