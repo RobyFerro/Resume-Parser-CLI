@@ -1,7 +1,7 @@
 # Created by .ignore support plugin (hsz.mobi)
 .idea/*
-/tmp/*
 /test/*
 /results/converted/*
 /results/faces/*
 /node_modules/
+!/src/tmp_exports/
