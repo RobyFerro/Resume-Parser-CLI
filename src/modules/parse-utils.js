@@ -4,9 +4,24 @@ const fs = require('fs');
 const rm = require('rimraf');
 const ImgParser = require('./img-parser');
 const jsonFile = require('jsonfile');
-const execSync = require('child_process').execSync;
+const cmd = require('node-cmd');
 
 class ParseUtils {
+	
+	constructor(file, dirname) {
+		this.file = file;
+		this.dirname = dirname;
+		this.hash = Date.now().toString();
+		this.tmpDir = `${dirname}/tmp_exports/${this.hash}`;
+		this.exportDir = '';
+		this.fileInfo = path.parse(this.file);
+		this.result = {
+			text: null,
+			face: null,
+			pdf: null,
+			json: null
+		};
+	}
 	
 	/**
 	 *
@@ -18,7 +33,10 @@ class ParseUtils {
 		return new Promise(async resolve => {
 			
 			let tmpFile = file.replace(/ /g, "_");
-			fs.copyFileSync(file, tmpFile);
+			
+			if(tmpFile !== file) {
+				fs.copyFileSync(file, tmpFile);
+			} // if
 			
 			resolve(tmpFile);
 		});
@@ -29,22 +47,7 @@ class ParseUtils {
 	 * @param file
 	 */
 	static deleteTmpFile(file) {
-		fs.unlinkSync(file);
-	}
-	
-	constructor(file, dirname) {
-		this.file = file;
-		this.dirname = dirname;
-		this.hash = Date.now().toString();
-		this.tmpDir = `${dirname}/tmp/${this.hash}`;
-		this.exportDir = '';
-		this.fileInfo = path.parse(this.file);
-		this.result = {
-			text: null,
-			face: null,
-			pdf: null,
-			json: null
-		};
+		//fs.unlinkSync(file);
 	}
 	
 	/**
@@ -120,11 +123,6 @@ class ParseUtils {
 	 * Create TMP directory for this instance
 	 */
 	createTempDir() {
-		
-		if(!fs.existsSync(`${this.dirname}/tmp`)) {
-			fs.mkdirSync(`${this.dirname}/tmp`);
-		} // if
-		
 		fs.mkdirSync(this.tmpDir);
 	}
 	
@@ -264,7 +262,12 @@ class ParseUtils {
 		return new Promise(async function(resolve) {
 			
 			if(main.fileInfo.ext !== '.pdf') {
-				execSync(`/etc/bashrc; export HOME=/tmp/; /usr/bin/oowriter --convert-to pdf ${main.file} --outdir ${main.exportDir} --headless`);
+				await cmd.get(`export HOME=/tmp/; libreoffice --headless --convert-to pdf ${main.file} --outdir ${main.exportDir}`,
+					function(err) {
+						if(err) throw err;
+						main.result.pdf = `${main.exportDir}/${main.fileInfo.name}.pdf`;
+						resolve(true);
+					});
 			} else {
 				
 				let export_file = `${main.exportDir}/${main.fileInfo.base}`;
@@ -277,11 +280,10 @@ class ParseUtils {
 				await fs.createReadStream(`${main.file}`)
 					.pipe(fs.createWriteStream(`${export_file}`));
 				
+				main.result.pdf = `${main.exportDir}/${main.fileInfo.name}.pdf`;
+				resolve(true);
 			} // if
 			
-			main.result.pdf = `${main.exportDir}/${main.fileInfo.name}.pdf`;
-			
-			resolve(true);
 		});
 		
 		

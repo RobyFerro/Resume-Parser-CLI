@@ -3,7 +3,7 @@ const ParseUtils = require('./modules/parse-utils');
 const program = require('commander');
 
 program
-	.version('Beta.1')
+	.version('v1.1.6')
 	.option('-f, --file [value]', 'REQUIRED: Add file to parse.')
 	.option('--export-dir [value]', 'Select output dir for exported results.')
 	.option('-t, --text', 'Get document text')

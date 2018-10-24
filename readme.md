@@ -38,7 +38,7 @@ npm config set unsafe-perm true
 
 ## Requirements
 * Node 10.04.*
-* Apache OpenOffice Writer 
+* Libreoffice
 
 ### Linux dependencies
 ##### cmake 
