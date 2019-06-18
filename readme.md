@@ -1,6 +1,8 @@
 # Resume Parser CLI
 A simple Node.js CLI for parse a resume.
 
+This package is pretty much obsolete. I recommend you to switch to [ResumeParser.js](https://github.com/RobyFerro/ResumeParser.js.git), which covers the same functionality as Resume Parser CLI.
+
 ## Getting started
 ```
 npm install -g resume-parser-cli
